@@ -1,5 +1,5 @@
 import { UnauthenticatedError } from '../utils/error/custom.js';
-import jwt from "jsonwebtoken"
+import jwt from 'jsonwebtoken';
 
 /**
  *

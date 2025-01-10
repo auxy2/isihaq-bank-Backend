@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon index.js",
+    "format": "prettier --write .",
     "postinstall": "ls -l node_modules/axios/dist/node/"
   },
   "keywords": [],
@@ -26,6 +27,7 @@
     "mongoose": "^8.9.3",
     "mongoose-paginate-v2": "^1.9.0",
     "morgan": "^1.10.0",
-    "nodemon": "^3.1.9"
+    "nodemon": "^3.1.9",
+    "prettier": "^3.4.2"
   }
 }

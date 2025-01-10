@@ -1,16 +1,13 @@
 // import axios from 'axios'
 import dontenv from 'dotenv';
 
-dontenv.config()
+dontenv.config();
 
 const { AUTH_OPTION = 'Bearer', PAYSTACK_SECRETE } = process.env;
-const listBanks = 'https://api.paystack.co/bank'
-const validateAccount = "https://api.paystack.co/bank/resolve";
+const listBanks = 'https://api.paystack.co/bank';
+const validateAccount = 'https://api.paystack.co/bank/resolve';
 const cardPayment = 'https://api.paystack.co/transaction/initialize';
 const verifyTransaction = `https://api.paystack.co/transaction/verify/`;
-
-
-
 
 export const response = async (url, paymentData) => {
   const res = await fetch(url, {
@@ -25,18 +22,18 @@ export const response = async (url, paymentData) => {
   if (!res.ok) {
     // Handle HTTP errors
     const errorData = await res.json();
-    throw new Error(`HTTP error! Status: ${res.status} - ${errorData.message || 'Unknown error'}`);
+    throw new Error(
+      `HTTP error! Status: ${res.status} - ${errorData.message || 'Unknown error'}`
+    );
   }
 
   return await res.json();
 };
 
-
-
 export const banks = async () => {
   try {
     const response = await fetch(listBanks, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `${AUTH_OPTION} ${PAYSTACK_SECRETE}`,
       },
@@ -45,29 +42,29 @@ export const banks = async () => {
     if (!response.ok) {
       // Handle HTTP errors
       const errorData = await response.json();
-      console.log("Error fetching banks:", errorData.message || "Unknown error");
+      console.log(
+        'Error fetching banks:',
+        errorData.message || 'Unknown error'
+      );
       return [];
     }
 
     const data = await response.json();
     return data.data;
   } catch (error) {
-    console.log("Error fetching banks:", error.message);
+    console.log('Error fetching banks:', error.message);
     return [];
   }
 };
 
-
-
-
 export const verifyAccount = async (data) => {
   try {
-    console.log("data", data, PAYSTACK_SECRETE);
+    console.log('data', data, PAYSTACK_SECRETE);
 
     const response = await fetch(
       `${validateAccount}?account_number=${data.accountNumber}&bank_code=${data.bankCode}`,
       {
-        method: "GET",
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${PAYSTACK_SECRETE}`,
         },
@@ -77,91 +74,86 @@ export const verifyAccount = async (data) => {
     if (!response.ok) {
       // Handle HTTP errors
       const errorData = await response.json();
-      console.log("Error verifying account:", errorData.message.split(". ")[0]);
-      return errorData.message.split(". ")[0];
+      console.log('Error verifying account:', errorData.message.split('. ')[0]);
+      return errorData.message.split('. ')[0];
     }
 
     const accountData = await response.json();
-    console.log("Account Name:", accountData.data.account_name);
-    console.log("Bank Name:", accountData.data.bank_name);
+    console.log('Account Name:', accountData.data.account_name);
+    console.log('Bank Name:', accountData.data.bank_name);
     return accountData.data;
   } catch (error) {
-    console.log("Error verifying account:", error.message);
+    console.log('Error verifying account:', error.message);
     return error.message;
   }
 };
 
-
 export const createRecipient = async (accountNumber, bankCode, accountName) => {
   try {
-    const response = await fetch("https://api.paystack.co/transferrecipient", {
-      method: "POST",
+    const response = await fetch('https://api.paystack.co/transferrecipient', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRETE}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        type: "nuban",
+        type: 'nuban',
         name: accountName,
         account_number: accountNumber,
         bank_code: bankCode,
-        currency: "NGN",
+        currency: 'NGN',
       }),
     });
 
     if (!response.ok) {
       // Handle HTTP errors
       const errorData = await response.json();
-      console.error("Error creating recipient:", errorData);
+      console.error('Error creating recipient:', errorData);
       throw new Error(
-        `Failed to create recipient with status ${response.status}: ${errorData.message || "Unknown error"}`
+        `Failed to create recipient with status ${response.status}: ${errorData.message || 'Unknown error'}`
       );
     }
 
     const data = await response.json();
     return data.data.recipient_code;
   } catch (error) {
-    console.error("Error creating recipient:", error.message);
+    console.error('Error creating recipient:', error.message);
     throw error;
   }
 };
 
-
-
 export const payout = async (recipientCode, amount) => {
   try {
-    const response = await fetch("https://api.paystack.co/transfer", {
-      method: "POST",
+    const response = await fetch('https://api.paystack.co/transfer', {
+      method: 'POST',
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRETE}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        source: "balance",
+        source: 'balance',
         amount: amount * 100,
         recipient: recipientCode,
-        reason: "Payment for services",
+        reason: 'Payment for services',
       }),
     });
 
     if (!response.ok) {
       // Handle HTTP errors
       const errorData = await response.json();
-      console.log("Error making transfer:", errorData);
+      console.log('Error making transfer:', errorData);
       throw new Error(
-        `Transfer failed with status ${response.status}: ${errorData.message || "Unknown error"}`
+        `Transfer failed with status ${response.status}: ${errorData.message || 'Unknown error'}`
       );
     }
 
     const data = await response.json();
-    console.log("Transfer Successful:", data);
+    console.log('Transfer Successful:', data);
     return data;
   } catch (error) {
-    console.log("Error making transfer:", error.message);
+    console.log('Error making transfer:', error.message);
   }
 };
-
-
 
 export const payWithCard = async (paymentData) => {
   const paymentPayload = {
@@ -175,21 +167,20 @@ export const payWithCard = async (paymentData) => {
   return res;
 };
 
-
 export const verifyPaystackTransaction = async (reference) => {
   try {
     const response = await fetch(`${verifyTransaction}${reference}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${PAYSTACK_SECRETE}`,
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     });
 
     if (!response.ok) {
       // Handle HTTP errors
       const errorData = await response.json();
-      console.error("Error verifying transaction:", errorData.message);
+      console.error('Error verifying transaction:', errorData.message);
       throw new Error(errorData.message);
     }
 
@@ -207,7 +198,7 @@ export const verifyPaystackTransaction = async (reference) => {
       reason: res.metadata.reason,
     };
   } catch (error) {
-    console.error("Error verifying transaction:", error.message);
+    console.error('Error verifying transaction:', error.message);
     throw error;
   }
 };
