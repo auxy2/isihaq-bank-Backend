@@ -82,7 +82,7 @@ export const topUp = asyncWrapper(async(req, res) => {
             callback_url: paystackCallbackUrl,
             reason: "Top Up Wallet",
           };
-
+console.log(paymentData);
     }catch(e){
         return error(res, e?.statusCode || 500, e)
     }
