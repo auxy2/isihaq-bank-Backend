@@ -2,7 +2,7 @@ import { error, success } from "../helpers/response.js";
 import asyncWrapper from "../middlewares/async.js";
 import user from "../models/user.js";
 import User from "../models/user.js";
-import { banks, verifyAccount, createRecipient, payout } from "../servicces/paystack.js";
+import { banks, verifyAccount, createRecipient, payout, payWithCard, verifyPaystackTransaction } from "../servicces/paystack.js";
 import { BadRequestError } from "../utils/error/custom.js";
 
 
@@ -68,7 +68,7 @@ export const tranfer = asyncWrapper(async(req, res) => {
 export const topUp = asyncWrapper(async(req, res) => {
     try{
         const { 
-            body: { username, amount } 
+            body: { username } 
         }= req;
         const user = await User.findOne({ username });
         if(!user){
@@ -77,13 +77,66 @@ export const topUp = asyncWrapper(async(req, res) => {
 
         const paymentData = {
             email: user.email,
-            amount: amount * 100,
             currency: "NGN",
-            callback_url: paystackCallbackUrl,
+            callback_url: "https://abank.vercel.app/api/verify-card-payment",
             reason: "Top Up Wallet",
           };
-console.log(paymentData);
+          const chargeResponse = await payWithCard(paymentData);
+
+      if (!chargeResponse.status) {
+        return sendResponse(
+          res,
+          200,
+          'Failed to save card. Charge was not successful.'
+        );
+      }
+
+      const data = {
+        gateway: 'Paystack',
+        message: 'Please use the authorization link to complete your payment.',
+        authorization_url: chargeResponse.data.authorization_url,
+      };
+      return success(res, 200, undefined, data);
     }catch(e){
         return error(res, e?.statusCode || 500, e)
+    }
+})
+
+
+export const verifyPaystack = asyncWrapper(async(req, res) => {
+    try{
+        const {
+            query: { reference },
+        } = req;
+
+        if (!reference) {
+            throw new BadRequestError('Transaction reference is required.');
+          }
+          const verificationResponse = await verifyPaystackTransaction(reference);
+        //   if (!verificationResponse) {
+        //     res.redirect(303, `${solutionsPlatofrms}tutor/settings?status=failed`)
+        //   }
+        const user = await User.findOne({ email: verificationResponse.email });
+
+        if (!user) {
+            res.redirect(303, `${solutionsPlatofrms}tutor/settings?status=failed`)
+            throw new NotFoundError(
+              'User associated with this transaction not found.'
+            );
+          }
+
+          if (verificationResponse.status === 'success') {
+            const { authorization, reason } = verificationResponse;
+      
+            if (authorization) {
+                const amount =  verificationResponse.amount / 100;
+                user.walletBalance += amount;
+                await user.save();
+                res.redirect(303, )
+            }
+        }
+
+    }catch(e){
+        return error(res, e?.statusCode || 500, e);
     }
 })

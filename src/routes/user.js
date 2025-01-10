@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { login, signUp } from "../controllers/auth.js";
-import { listBanks, tranfer, validateAccount } from "../controllers/user.js";
+import { listBanks, topUp, tranfer, validateAccount, verifyPaystack } from "../controllers/user.js";
 
 
 const router = Router();
@@ -11,6 +11,8 @@ router.post('/login', login);
 router.get('/banks', listBanks);
 router.post('/account/verify', validateAccount);
 router.post('/transfer', tranfer)
+router.get('topWallet', topUp);
+router.get('verify-card-payment', verifyPaystack)
 
 
 export default router

@@ -6,7 +6,9 @@ dontenv.config()
 const { AUTH_OPTION = 'Bearer', PAYSTACK_SECRETE } = process.env;
 const listBanks = 'https://api.paystack.co/bank'
 const validateAccount = "https://api.paystack.co/bank/resolve";
-export const cardPayment = 'https://api.paystack.co/transaction/initialize';
+const cardPayment = 'https://api.paystack.co/transaction/initialize';
+const verifyTransaction = `https://api.paystack.co/transaction/verify/`;
+
 
 
 
@@ -171,4 +173,41 @@ export const payWithCard = async (paymentData) => {
   };
   const res = await response(cardPayment, paymentPayload);
   return res;
+};
+
+
+export const verifyPaystackTransaction = async (reference) => {
+  try {
+    const response = await fetch(`${verifyTransaction}${reference}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${PAYSTACK_SECRETE}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      // Handle HTTP errors
+      const errorData = await response.json();
+      console.error("Error verifying transaction:", errorData.message);
+      throw new Error(errorData.message);
+    }
+
+    const responseData = await response.json();
+    const res = responseData.data;
+
+    console.log(res.metadata);
+
+    return {
+      status: res.status,
+      email: res.customer.email,
+      authorization: res.authorization,
+      amount: res.amount,
+      channel: res.channel,
+      reason: res.metadata.reason,
+    };
+  } catch (error) {
+    console.error("Error verifying transaction:", error.message);
+    throw error;
+  }
 };
