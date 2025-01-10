@@ -10,9 +10,9 @@ router.post('/login', login);
 
 router.get('/banks', listBanks);
 router.post('/account/verify', validateAccount);
-router.post('/transfer', tranfer)
-router.get('topWallet', topUp);
-router.get('verify-card-payment', verifyPaystack)
+router.post('/transfer', tranfer);
+router.get('/topWallet', topUp);
+router.get('verify-card-payment', verifyPaystack);
 
 
 export default router

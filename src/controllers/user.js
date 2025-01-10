@@ -71,10 +71,10 @@ export const topUp = asyncWrapper(async(req, res) => {
             body: { username } 
         }= req;
         const user = await User.findOne({ username });
+        console.log(user)
         if(!user){
             throw new BadRequestError("No user found please login again")
         }
-
         const paymentData = {
             email: user.email,
             currency: "NGN",
