@@ -68,8 +68,9 @@ export const tranfer = asyncWrapper(async(req, res) => {
 export const topUp = asyncWrapper(async(req, res) => {
     try{
         const { 
-            body: { username } 
+            body: { username, amount } 
         }= req;
+        console.log(username)
         const user = await User.findOne({ username });
         console.log(user)
         if(!user){
@@ -77,12 +78,12 @@ export const topUp = asyncWrapper(async(req, res) => {
         }
         const paymentData = {
             email: user.email,
+            amount: amount * 100,
             currency: "NGN",
             callback_url: "https://abank.vercel.app/api/verify-card-payment",
             reason: "Top Up Wallet",
           };
           const chargeResponse = await payWithCard(paymentData);
-
       if (!chargeResponse.status) {
         return sendResponse(
           res,
@@ -116,6 +117,7 @@ export const verifyPaystack = asyncWrapper(async(req, res) => {
         //   if (!verificationResponse) {
         //     res.redirect(303, `${solutionsPlatofrms}tutor/settings?status=failed`)
         //   }
+        console.log(verificationResponse);
         const user = await User.findOne({ email: verificationResponse.email });
 
         if (!user) {
@@ -132,7 +134,8 @@ export const verifyPaystack = asyncWrapper(async(req, res) => {
                 const amount =  verificationResponse.amount / 100;
                 user.walletBalance += amount;
                 await user.save();
-                res.redirect(303, )
+                // res.redirect(303, )
+                return success(res, 200, user, "transaction successfull")
             }
         }
 
