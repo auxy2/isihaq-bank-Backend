@@ -114,14 +114,14 @@ export const verifyPaystack = asyncWrapper(async(req, res) => {
             throw new BadRequestError('Transaction reference is required.');
           }
           const verificationResponse = await verifyPaystackTransaction(reference);
-        //   if (!verificationResponse) {
-        //     res.redirect(303, `${solutionsPlatofrms}tutor/settings?status=failed`)
-        //   }
+          if (!verificationResponse) {
+            res.redirect(303, `https://abdullahibanking.vercel.app/login`)
+          }
         console.log(verificationResponse);
         const user = await User.findOne({ email: verificationResponse.email });
 
         if (!user) {
-            res.redirect(303, `${solutionsPlatofrms}tutor/settings?status=failed`)
+            res.redirect(303, `https://abdullahibanking.vercel.app/login`)
             throw new NotFoundError(
               'User associated with this transaction not found.'
             );
@@ -134,8 +134,7 @@ export const verifyPaystack = asyncWrapper(async(req, res) => {
                 const amount =  verificationResponse.amount / 100;
                 user.walletBalance += amount;
                 await user.save();
-                // res.redirect(303, )
-                return success(res, 200, user, "transaction successfull")
+                res.redirect(303, "https://abdullahibanking.vercel.app/login");
             }
         }
 
