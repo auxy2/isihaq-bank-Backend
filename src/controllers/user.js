@@ -127,7 +127,6 @@ export const verifyPaystack = asyncWrapper(async (req, res) => {
     if (!verificationResponse) {
       res.redirect(303, `https://abdullahibanking.vercel.app`);
     }
-    console.log(verificationResponse);
     const user = await User.findOne({ email: verificationResponse.email });
 
     if (!user) {
@@ -144,7 +143,7 @@ export const verifyPaystack = asyncWrapper(async (req, res) => {
         const amount = verificationResponse.amount / 100;
         user.walletBalance += amount;
         await user.save();
-        res.redirect(303, 'https://abdullahibanking.vercel.app/login');
+        res.redirect(303, 'https://abdullahibanking.vercel.app');
       }
     }
   } catch (e) {
