@@ -28,7 +28,13 @@ app.use(bodyParser.raw({ type: 'application/json' }));
 
 const server = http.createServer(app);
 
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
+pp.use(
+    cors({
+      origin: ['https://abdullahibanking.vercel.app'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    })
+  );
 app.use(morgan('tiny'));
 app.use(helmet());
 
